@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import Layout from "../../components/Layout";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 const UnitTypesPage = () => {
   const [unitTypes, setUnitTypes] = useState([]);
@@ -38,9 +40,17 @@ const UnitTypesPage = () => {
   };
 
   const handleGeneratePDF = () => {
-    // Placeholder for PDF generation logic
-    console.log("Generating PDF for:", unitTypes);
-    alert("PDF generation triggered! Check console for data.");
+    const doc = new jsPDF();
+    doc.setFontSize(18);
+    doc.text("Unit Types", 14, 20);
+
+    autoTable(doc, {
+      startY: 30,
+      head: [["Unit Type", "Monthly Fee ($)"]],
+      body: unitTypes.map(unit => [unit.name, parseFloat(unit.fee).toFixed(2)]),
+    });
+
+    doc.save("unit-types.pdf");
   };
 
   return (
@@ -120,7 +130,7 @@ const UnitTypesPage = () => {
           </div>
         </form>
 
-        {/* Unit Types List */}
+        {/* Unit Types Table */}
         {unitTypes.length > 0 && (
           <div className="mt-8">
             <h3 className="text-xl font-medium text-gray-800 mb-4">Added Unit Types</h3>

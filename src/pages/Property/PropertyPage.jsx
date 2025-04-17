@@ -1,5 +1,8 @@
 import React, { useState } from "react";
 import Layout from "../../components/Layout";
+import Barcode from "react-barcode";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 const PropertyPage = () => {
   const [formData, setFormData] = useState({
@@ -22,8 +25,36 @@ const PropertyPage = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Handle form submission logic here
     console.log(formData);
+    alert("Property details saved (mock only).");
+  };
+
+  const generatePDF = () => {
+    const doc = new jsPDF();
+    doc.setFontSize(18);
+    doc.text("Property Details", 14, 20);
+
+    autoTable(doc, {
+      startY: 30,
+      head: [["Field", "Value"]],
+      body: [
+        ["Property Name", formData.propertyName],
+        ["Address", formData.address],
+        ["Ownership Title", formData.ownershipTitle],
+        ["Association Name", formData.associationName],
+        ["Map Location", formData.mapLocation],
+        ["Currency", formData.currency],
+      ],
+    });
+
+    // Add Barcode
+    const canvas = document.querySelector("#barcode canvas");
+    if (canvas) {
+      const imgData = canvas.toDataURL("image/png");
+      doc.addImage(imgData, "PNG", 14, doc.lastAutoTable.finalY + 10, 100, 30);
+    }
+
+    doc.save("property-details.pdf");
   };
 
   return (
@@ -110,7 +141,7 @@ const PropertyPage = () => {
           </div>
 
           <div className="space-y-1 md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700">Property Documents</label>
+            <label className="block text-sm font-medium text-gray-700">Property Document (optional)</label>
             <input
               type="file"
               name="document"
@@ -118,6 +149,14 @@ const PropertyPage = () => {
               className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               accept=".pdf,.doc,.docx,.jpg,.png"
             />
+          </div>
+
+          {/* Barcode Preview */}
+          <div className="md:col-span-2 mt-4 space-y-4">
+            <p className="text-gray-600 text-sm">Barcode Preview:</p>
+            <div id="barcode">
+              {formData.propertyName && <Barcode value={formData.propertyName} />}
+            </div>
           </div>
 
           <div className="md:col-span-2 flex justify-end gap-4 mt-4">
@@ -129,6 +168,7 @@ const PropertyPage = () => {
             </button>
             <button
               type="button"
+              onClick={generatePDF}
               className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md transition-colors"
             >
               Generate PDF
