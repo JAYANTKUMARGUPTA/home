@@ -2,46 +2,97 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [credentials, setCredentials] = useState({
+    username: "",
+    password: ""
+  });
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
-    e.preventDefault();
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setCredentials(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
 
-    // Dummy credentials (replace with API logic later)
-    if (username === "admin" && password === "admin123") {
-      navigate("/dashboard");
-    } else {
-      alert("Invalid credentials");
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError("");
+    setIsLoading(true);
+
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      if (credentials.username === "admin" && credentials.password === "admin123") {
+        navigate("/dashboard");
+      } else {
+        setError("Invalid username or password");
+      }
+    } catch (err) {
+      setError("Login failed. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="flex justify-center items-center h-screen bg-gray-100">
+    <div className="flex justify-center items-center min-h-screen bg-gray-100 p-4">
       <form
         onSubmit={handleLogin}
-        className="bg-white p-8 rounded shadow-md w-80"
+        className="bg-white p-6 rounded-lg shadow-md w-full max-w-md"
       >
-        <h1 className="text-xl font-bold mb-4">HOA Management Login</h1>
-        <input
-          className="w-full p-2 border mb-4"
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-        />
-        <input
-          className="w-full p-2 border mb-4"
-          placeholder="Password"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+        <h1 className="text-2xl font-bold mb-6 text-center text-gray-800">
+          HOA Management Login
+        </h1>
+        
+        {error && (
+          <div className="mb-4 p-2 bg-red-100 text-red-700 text-sm rounded">
+            {error}
+          </div>
+        )}
+        
+        <div className="mb-4">
+          <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
+            Username
+          </label>
+          <input
+            id="username"
+            name="username"
+            type="text"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Enter username"
+            value={credentials.username}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        
+        <div className="mb-6">
+          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+            Password
+          </label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Enter password"
+            value={credentials.password}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white p-2 rounded"
+          disabled={isLoading}
+          className={`w-full py-2 px-4 rounded-md text-white font-medium ${isLoading ? 'bg-blue-400' : 'bg-blue-600 hover:bg-blue-700'} transition-colors`}
         >
-          Login
+          {isLoading ? 'Logging in...' : 'Login'}
         </button>
       </form>
     </div>
